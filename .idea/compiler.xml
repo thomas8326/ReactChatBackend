@@ -6,8 +6,9 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="chatProject" />
+        <module name="ReactChatBackend" />
         <module name="Project-backend" />
+        <module name="chatProject" />
       </profile>
     </annotationProcessing>
   </component>

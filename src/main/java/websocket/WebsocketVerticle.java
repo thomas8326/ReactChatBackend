@@ -42,6 +42,10 @@ public class WebsocketVerticle extends AbstractVerticle {
                 String id = serverWebSocket.binaryHandlerID();
 
                 serverWebSocket.frameHandler(handler -> {
+                    if (handler.isClose()) {
+                        return;
+                    }
+
                     MessageRequest messageRequest = new JsonObject(handler.textData()).mapTo(MessageRequest.class);
 
                     createRoom(messageRequest, id);
@@ -50,6 +54,11 @@ public class WebsocketVerticle extends AbstractVerticle {
                     DeliveryOptions options = new DeliveryOptions();
                     options.addHeader("WEB_SOCKET_ID", id);
                     vertx.eventBus().publish(Events.SERVICE_CREATE_MESSAGE, messageRequest, options);
+                });
+
+                serverWebSocket.closeHandler(handler -> {
+                    connectedMap.remove(id);
+                    roomUsers.entrySet().forEach(room -> room.getValue().remove(id));
                 });
             }
         }).listen(8090);
@@ -62,28 +71,13 @@ public class WebsocketVerticle extends AbstractVerticle {
     private void sendMessageToRoomUser(Message<MessageRequest> event) {
         MessageRequest messageRequest = event.body();
         roomUsers.get(messageRequest.getRoomId())
-                .forEach(webSocketId -> connectedMap.get(webSocketId).writeTextMessage(messageRequest.getContent()));
+                .forEach(webSocketId -> {
+                    if(connectedMap.get(webSocketId).equals(null)) {
+                        return;
+                    }
+                    connectedMap.get(webSocketId).writeTextMessage(messageRequest.getContent());
+                });
     }
-
-//    private void apiRouteHandler(Router router) {
-//        router.routeWithRegex("/api/chatroom/(?<roomId>\\w+)").handler(this::createRoom);
-//    }
-
-//    private void createRoom(RoutingContext routingContext) {
-//        String roomId = routingContext.request().getParam("roomId");
-//        ArrayList<String> roomParticipants = new ArrayList<>();
-//        String userId = routingContext.getBodyAsJson().getValue("userId").toString();
-//
-//        if(!roomUsers.containsKey(roomId)) {
-//            roomParticipants.add(userId);
-//            roomUsers.put(roomId, roomParticipants);
-//        } else {
-//            roomUsers.get(roomId).add(userId);
-//        }
-//
-//        routingContext.response().setStatusCode(200);
-//        routingContext.response().end();
-//    }
 
     private void createRoom(MessageRequest messageRequest, String webSocketId) {
         String roomId = messageRequest.getRoomId();
