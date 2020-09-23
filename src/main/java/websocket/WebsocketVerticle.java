@@ -100,17 +100,4 @@ public class WebsocketVerticle extends AbstractVerticle {
     private void setRoom(Message<String> event) {
 
     }
-
-
-//                connectedMap.put("chat.room." + chatRoom, serverWebSocket);
-//    Matcher matcher = chatUrlPattern.matcher(serverWebSocket.path());
-//                matcher.find();
-//    final String chatRoom = matcher.group("roomId");
-//    final String id = serverWebSocket.textHandlerID();
-    //                    for (Map.Entry<String, ServerWebSocket> entry : connectedMap.entrySet()) {
-//                        if(entry.getKey().equals("chat.room." + chatRoom)) {
-//                            entry.getValue().writeTextMessage(handler.textData());
-////                            vertx.eventBus().publish(key, handler.textData());
-//                        }
-//                    }
 }
